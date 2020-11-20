@@ -97,7 +97,8 @@ classdef Problem4 < Problem_Base_1D
     end
     % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     function res = exact( self, t )
-      res = log(1+t)/log(2);
+      % no exact solution for the moment
+      res = 0;
     end
   end
 end

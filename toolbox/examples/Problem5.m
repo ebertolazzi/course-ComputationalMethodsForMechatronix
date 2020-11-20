@@ -86,7 +86,7 @@ classdef Problem5 < Problem_Base_1D
   methods
     % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     function self = Problem5()
-      self@Problem_Base_1D( 'isoperimetric', 2, 1 );
+      self@Problem_Base_1D( 'isoperimetric example', 2, 1 );
       self.a   = 0;
       self.b   = 1;
     end

@@ -89,10 +89,10 @@ classdef Problem1 < Problem_Base_1D
 
   methods
     % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    function self = Problem1( a, b )
-      self@Problem_Base_1D( '1D', 2, 0 );
-      self.a = a;
-      self.b = b;
+    function self = Problem1()
+      self@Problem_Base_1D( 'Example taked for Calogero exercize', 2, 0 );
+      self.a = 0;
+      self.b = 1;
     end
     % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     function delete( self )

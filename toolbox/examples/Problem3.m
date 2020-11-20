@@ -24,7 +24,7 @@ classdef Problem3 < Problem_Base_1D
     %
     % evaluate the function L(x,x',t)
     function y = eval_Guess( self, x )
-      y = -x/self.b;
+      y = -1;
     end
 
     % evaluate the function L(y,y',x)
@@ -41,7 +41,7 @@ classdef Problem3 < Problem_Base_1D
     % evaluate the function DL(y,y',t) / Dy'
     function L_D_2 = eval_L_D_2( self, y, z, x )
       tmp = 1+z^2;
-      L_D_2 = z/sqrt(-y*tmp);
+      L_D_2 = z/sqrt(max(eps,-y*tmp)); % avoid complex number
     end
 
     % evaluate the function BC(y(a),y'(a),y(b),y'(b))
@@ -97,7 +97,8 @@ classdef Problem3 < Problem_Base_1D
     end
     % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     function res = exact( self, t )
-      res = log(1+t)/log(2);
+      % no exact solution for the moment
+      res = 0;
     end
   end
 end

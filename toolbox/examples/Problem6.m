@@ -96,7 +96,7 @@ classdef Problem6 < Problem_Base_1D
   methods
     % - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     function self = Problem6( a, ya, b, yb, len )
-      self@Problem_Base_1D( 'catenary', 2, 1 );
+      self@Problem_Base_1D( 'Catenary problem', 2, 1 );
       self.a   = a;
       self.ya  = ya;
       self.b   = b;
