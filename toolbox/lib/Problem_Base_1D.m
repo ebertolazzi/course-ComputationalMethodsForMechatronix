@@ -30,7 +30,7 @@ classdef Problem_Base_1D < handle
     %   subject to  BC( x(a), x'(a), x(b), x'(b) ) = 0
     %
     %               / a
-    %   subject to  |   IC( x(a), x'(a), x(b), x'(b) ) dt = 0
+    %   subject to  |   IC( x, x', t ) dt = 0
     %               / b
     %
     % evaluate the function L(x,x',t)

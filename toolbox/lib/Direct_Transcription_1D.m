@@ -61,7 +61,7 @@ classdef Direct_Transcription_1D < handle
       n  = self.n;
       dt = (b-a)/(n-1);
       % ----------
-      G  = zeros( n, 1 );
+      G  = zeros( 1, n );
       for k=1:n-1
         tk  = a + dt * (k-1/2);
         xm  = (x(k+1)+x(k))/2;
