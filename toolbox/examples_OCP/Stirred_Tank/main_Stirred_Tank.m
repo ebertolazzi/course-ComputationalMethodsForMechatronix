@@ -19,9 +19,8 @@
 
 addpath('../../lib');
 
-N     = 300;
-L     = 300;
-nodes = 0:L/N:L;
+N     = 100;
+nodes = 0:0.78/N:1;
 
 bb = OCP_Stirred_Tank();
 bb.setup( nodes );

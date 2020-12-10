@@ -1,6 +1,6 @@
 %--------------------------------------------------------------------------%
 %                                                                          %
-%  Copyright (C) 2018                                                      %
+%  Copyright (C) 2020                                                      %
 %                                                                          %
 %         , __                 , __                                        %
 %        /|/  \               /|/  \                                       %
@@ -17,26 +17,12 @@
 %                                                                          %
 %--------------------------------------------------------------------------%
 
-classdef OCP_GoddardRocket < OCP_NLP
+classdef OCP_NAME_OF_THE_CLASS < OCP_NLP
 
   properties (SetAccess = private, Hidden = true)
-    h_i
-    v_i
-    v_f
-    m_i
-    m_f
-    %
-    Dc
-    Tmax
-    c
-    g0
-    %
-    hc
-    mc
-    vc
+    % PARAMETERS OF THE PROBLEM
     %
     epsi
-    epsi1
   end
 
   methods ( Hidden = true )
@@ -46,224 +32,62 @@ classdef OCP_GoddardRocket < OCP_NLP
     % | || (_-</ -_) '_| |  _| || | ' \/ _|  _| / _ \ ' \(_-<
     %  \_,_/__/\___|_|   |_|  \_,_|_||_\__|\__|_\___/_||_/__/
     %
-    function res = D( self, h, v )
-      Dc  = self.Dc;
-      hc  = self.hc;
-      h_i = self.h_i;
-      rr  = hc/h_i;
-      ee  = exp( rr * (h_i - h) );
-      res = Dc * (v^2) * ee;
+
+
+    %  _
+    % | |   __ _ __ _ _ _ __ _ _ _  __ _ ___
+    % | |__/ _` / _` | '_/ _` | ' \/ _` / -_)
+    % |____\__,_\__, |_| \__,_|_||_\__, \___|
+    %           |___/              |___/
+    %
+    function L = lag( self, nseg, t, X, U, P )
+      ...
     end
     %
-    function res = D_h( self, h, v )
-      Dc   = self.Dc;
-      hc   = self.hc;
-      h_i  = self.h_i;
-      rr   = hc/h_i;
-      ee_1 = -rr * exp( rr * (h_i - h) );
-      res  = Dc * (v^2) * ee_1;
+    function gradL = lag_gradient( self, nseg, t, X, U, P )
+      ...
     end
     %
-    function res = D_v( self, h, v )
-      Dc  = self.Dc;
-      hc  = self.hc;
-      h_i = self.h_i;
-      rr  = hc/h_i;
-      ee  = exp( rr * (h_i - h) );
-      res = 2 * Dc * v * ee;
+    function hessL = lag_hessian( self, nseg, t, X, U, P )
+      ...
     end
     %
-    function res = D_hh( self, h, v )
-      Dc   = self.Dc;
-      hc   = self.hc;
-      h_i  = self.h_i;
-      rr   = hc/h_i;
-      ee_2 = rr^2 * exp( rr * (h_i - h) );
-      res  = Dc * (v^2) * ee_2;
+    function hessL = lag_hessian_pattern( self )
+      ...
     end
-    %
-    function res = D_hv( self, h, v )
-      Dc   = self.Dc;
-      hc   = self.hc;
-      h_i  = self.h_i;
-      rr   = hc/h_i;
-      ee_1 = -rr * exp( rr * (h_i - h) );
-      res  = 2 * Dc * v * ee_1;
-    end
-    %
-    function res = D_vv( self, h, v )
-      Dc  = self.Dc;
-      hc  = self.hc;
-      h_i = self.h_i;
-      rr  = hc/h_i;
-      ee  = exp( rr * (h_i - h) );
-      res = 2 * Dc * ee;
-    end
-    %
-    function res = g( self, h )
-      g0  = self.g0;
-      h_i = self.h_i;
-      res = g0 * (h_i/h)^2;
-    end
-    %
-    function res = g_D( self, h )
-      g0  = self.g0;
-      h_i = self.h_i;
-      res =  -2 * g0 * h_i ^ 2 / h ^ 3;
-    end
-    %
-    function res = g_DD( self, h )
-      g0  = self.g0;
-      h_i = self.h_i;
-      res = 6 * g0 * h_i ^ 2 / h ^ 4;
-    end
+
     %   ___  ___  ___
     %  / _ \|   \| __|
     % | (_) | |) | _|
     %  \___/|___/|___|
     %
     function RES = RHS( self, nseg, t, X, U, P )
-      %
-      tf  = P(1);
-      c   = self.c;
-      h   = X(1);
-      v   = X(2);
-      m   = X(3);
-      T   = U(1);
-      D   = self.D(h,v);
-      gh  = self.g(h);
-      RES = tf*[ v; (T-D)/m-gh; -T/c ];
+      % rhs of teh ODE x' = f(x,u,p,t)
+      ...
+      ...
     end
     %
     function RES = JAC( self, nseg, t, X, U, P )
-      RES = sparse( 3, 5 );
-      %
-      tf   = P(1);
-      c    = self.c;
-      h    = X(1);
-      v    = X(2);
-      m    = X(3);
-      T    = U(1);
-      D    = self.D(h,v);
-      Dh   = self.D_h(h,v);
-      Dv   = self.D_v(h,v);
-      gh   = self.g(h);
-      gh_D = self.g_D(h);
-
-      RES(1,2) = tf;
-      RES(1,5) = v;
-
-      RES(2,1) = -tf*(Dh/m+gh_D);
-      RES(2,2) = -tf*Dv/m;
-      RES(2,3) = tf*(D-T)/m^2;
-      RES(2,4) = tf/m;
-      RES(2,5) = (T-D)/m-gh;
-
-      RES(3,4) = -tf/c;
-      RES(3,5) = -T/c;
+      RES = sparse( self.nx, self.nx+self.nu+self.np );
+      ...
+      ...
     end
     %
     function RES = JAC_pattern( self )
-      RES = sparse( 3, 5 );
-      RES(1,2) = 1;
-      RES(1,5) = 1;
-      RES(2,1) = 1;
-      RES(2,2) = 1;
-      RES(2,3) = 1;
-      RES(2,4) = 1;
-      RES(2,5) = 1;
-      RES(3,4) = 1;
-      RES(3,5) = 1;
+      RES = sparse( self.nx, self.nx+self.nu+self.np );
+      ...
+      ...
     end
     %
     function H = HESS( self, nseg, t, X, U, P, L )
-      H1    = sparse(5,5);
-      H2    = sparse(5,5);
-      H3    = sparse(5,5);
-
-      tf    = P(1);
-      c     = self.c;
-      h     = X(1);
-      v     = X(2);
-      m     = X(3);
-      T     = U(1);
-      D     = self.D(h,v);
-      Dh    = self.D_h(h,v);
-      Dv    = self.D_v(h,v);
-      Dhh   = self.D_hh(h,v);
-      Dhv   = self.D_hv(h,v);
-      Dvv   = self.D_vv(h,v);
-      gh    = self.g(h);
-      gh_D  = self.g_D(h);
-      gh_DD = self.g_DD(h);
-
-      % tf*v
-      H1(2,5) = 1;
-      H1(5,2) = 1;
-
-      % tf*T/m - tf*D/m - tf*gh;
-
-      % -Dh*tf/m - gh_D
-      H2(1,1) = -tf*(Dhh/m+gh_DD);
-      H2(1,2) = -tf*Dhv/m;
-      H2(1,3) =  tf*Dh/m^2;
-      H2(1,5) = -(Dh/m+gh_D);
-      H2(2,1) = H2(1,2);
-      H2(3,1) = H2(1,3);
-      H2(5,1) = H2(1,5);
-
-      % -tf*Dv/m
-      H2(2,2) = -tf*Dvv/m;
-      H2(2,3) =  tf*Dv/m^2;
-      H2(2,5) = -Dv/m;
-      H2(3,2) = H2(2,3);
-      H2(5,2) = H2(2,5);
-
-      % tf*(D-T)/m^2
-      H2(3,3) = 2*tf*(T-D)/m^3;
-      H2(3,4) = -tf/m^2;
-      H2(3,5) = (D-T)/m^2;
-      H2(4,3) = H2(3,4);
-      H2(5,3) = H2(3,5);
-
-      % tf/m;
-      H2(4,5) = 1/m;
-      H2(5,4) = H2(4,5);
-
-      % -tf*T/c;
-      H3(4,5) = -1/c;
-      H3(5,4) = H3(4,5);
-
-      H = L(1)*H1+L(2)*H2+L(3)*H3;
+      H = sparse( self.nx+self.nu+self.np, self.nx+self.nu+self.np );
+     ...
+     ...
     end
     %
     function H = HESS_pattern( self )
-      H = sparse(5,5);
-
-      H(1,1) = 1;
-      H(1,2) = 1;
-      H(1,3) = 1;
-      H(1,5) = 1;
-
-      H(2,1) = 1;
-      H(2,2) = 1;
-      H(2,3) = 1;
-      H(2,5) = 1;
-
-      H(3,1) = 1;
-      H(3,2) = 1;
-      H(3,3) = 1;
-      H(3,4) = 1;
-      H(3,5) = 1;
-
-      H(4,3) = 1;
-      H(4,4) = 1;
-      H(4,5) = 1;
-
-      H(5,1) = 1;
-      H(5,2) = 1;
-      H(5,3) = 1;
-      H(5,4) = 1;
+      H = sparse( self.nx+self.nu+self.np, self.nx+self.nu+self.np );
+      ...
     end
   end
 
@@ -279,29 +103,14 @@ classdef OCP_GoddardRocket < OCP_NLP
 
     function setup( self, nodes )
       setup@OCP_NLP( self, nodes );
+      % setup the parameters of the model
 
-      self.hc   = 500;
-      self.mc   = 0.6;
-      self.vc   = 620;
-      self.g0   = 1;
-
-      self.h_i  = 1;
-      self.v_i  = 0;
-      self.v_f  = 0;
-      self.m_i  = 1;
-      self.m_f  = self.m_i * self.mc;
-
-      self.Dc   = 0.5*self.vc*self.m_i/self.g0;
-      self.Tmax = 3.5*self.g0*self.m_i;
-      self.c    = 0.5*sqrt(self.g0*self.h_i);
-
-      self.epsi  = 0e-5;
-      self.epsi1 = 1e-8;
-
+      self.epsi  = 0; % no penalization of total variations of the control
     end
 
     function info = solve( self )
 
+      % load discretization parmeters
       nx   = self.nx;
       nu   = self.nu;
       np   = self.np;
@@ -314,13 +123,30 @@ classdef OCP_GoddardRocket < OCP_NLP
       utot = (N-nseg)*nu;
       xtot = N*nx;
 
-      x_lb = [ zeros(1,N); zeros(1,N); zeros(1,N)];
-      x_ub = [ Inf*ones(1,N); Inf*ones(1,N); self.m_i*ones(1,N)];
-      u_lb = zeros(1, N-nseg);
-      u_ub = self.Tmax*ones(1, N-nseg);
+      % set the lower bound of the states (nx x N)
+      x_lb = [ zeros(1,N); ...
+               zeros(1,N); ...
+               zeros(1,N)];
 
-      options.lb = self.pack( x_lb, u_lb, 0   ); % Lower bound on the variables.
-      options.ub = self.pack( x_ub, u_ub, 100 ); % Upper bound on the variables.
+      % set the upper bound of the states (nx x N)
+      x_ub = [ Inf*ones(1,N); ...
+               Inf*ones(1,N); ...
+               Inf*ones(1,N)];
+
+      % set the lower bound of the controls (nu x (N-nseg))
+      u_lb = zeros(1, N-nseg);
+
+      % set the upper bound of the controls (nu x (N-nseg))
+      u_ub = ones(1, N-nseg);
+
+      % set the lower bound of the optimization parameters (1 x np)
+      p_lb = [];
+
+      % set the upper bound of the optimization parameters (1 x np)
+      p_ub = [];
+
+      options.lb = self.pack( x_lb, u_lb, p_lb ); % Lower bound on the variables.
+      options.ub = self.pack( x_ub, u_ub, p_ub ); % Upper bound on the variables.
 
       % The constraint functions are bounded to zero
       dim = (N-nseg)*nx + (nseg-1)*njmp + nbc;
@@ -354,14 +180,9 @@ classdef OCP_GoddardRocket < OCP_NLP
         options.ipopt.limited_memory_update_type = 'bfgs'; % {bfgs}, sr1 = 6; % {6}
       end
 
-      % Run IPOPT.
-      t_f_guess = 1;
-      hguess    = ones(1,N) * self.h_i;
-      vguess    = (self.nodes.*(1-self.nodes));
-      mguess    = (self.m_f*self.nodes+self.m_i*(1-self.nodes));
-      Tguess    = ones(1,utot)*self.Tmax;
+      % GUESS SOLUTION
 
-      x0 = self.pack( [hguess;vguess;mguess], Tguess, t_f_guess ); % Lower bound on the variables.
+      x0 = self.pack( Xguess, Uguess, Pguess ); % Lower bound on the variables.
 
       tic
       [self.sol, info] = ipopt(x0,funcs,options);
@@ -371,6 +192,7 @@ classdef OCP_GoddardRocket < OCP_NLP
     end
 
     function plot( self )
+      % example of pliot solution
       nodes = self.nodes;
       X     = self.states();
       Tf    = self.sol(end);
@@ -401,25 +223,19 @@ classdef OCP_GoddardRocket < OCP_NLP
     %           |___/              |___/
     %
     function L = lagrange( self, nseg, tL, tR, XL, XR, UC, P )
-      %L = self.lagrange_zero(nseg, tL, tR, XL, XR, UC, P);
-      L = self.epsi*UC(1)^2;
+      L = self.midpoint_lagrange( nseg, tL, tR, XL, XR, UC, PARS, @self.lag );
     end
     %
     function gradL = lagrange_gradient( self, nseg, tL, tR, XL, XR, UC, P )
-      %gradL = self.lagrange_zero_gradient(nseg, tL, tR, XL, XR, UC, P);
-      gradL = [0,0,0,0,0,0,self.epsi*2*UC(1),0];
+      gradL = self.midpoint_lagrange_gradient( nseg, tL, tR, XL, XR, UC, PARS, @self.lag_gradient );
     end
     %
     function hessL = lagrange_hessian( self, nseg, tL, tR, XL, XR, UC, P )
-      %hessL = self.lagrange_zero_hessian(nseg, tL, tR, XL, XR, UC, P);
-      hessL = sparse(8,8);
-      hessL(7,7) = self.epsi*2;
+      hessL = self.midpoint_lagrange_hessian( nseg, tL, tR, XL, XR, UC, PARS, @self.lag_hessian );
     end
     %
     function hessL = lagrange_hessian_pattern( self )
-      %hessL = self.lagrange_zero_hessian_pattern();
-      hessL = sparse(8,8);
-      hessL(7,7) = 1;
+      hessL = self.midpoint_lagrange_hessian_pattern( nseg, tL, tR, XL, XR, UC, PARS, @self.lag_hessian_pattern );
     end
 
     %  __  __
@@ -428,24 +244,16 @@ classdef OCP_GoddardRocket < OCP_NLP
     % |_|  |_\__,_|\_, \___|_|
     %              |__/
     %
-    function M = mayer( ~, tL, tR, XL, XR, TS )
-      hL = XL(1); vL = XL(2); mL = XL(3);
-      hR = XR(1); vR = XR(2); mR = XR(3);
-      M  = -hR;
+    function M = mayer( self, tL, tR, XL, XR, TS )
     end
     %
     function gradM = mayer_gradient( self, tL, tR, XL, XR, TS )
-      gradM = [ 0, 0, 0, -1, 0, 0, 0];
     end
     %
     function hessM = mayer_hessian( self, tL, tR, XL, XR, TS )
-      dim   = 2*self.nx + self.np;
-      hessM = sparse(dim,dim);
     end
     %
     function hessM = mayer_hessian_pattern( self )
-      dim   = 2*self.nx + self.np;
-      hessM = sparse(dim,dim);
     end
 
     %   ___  ___  ___   _____   _   ___
@@ -532,45 +340,27 @@ classdef OCP_GoddardRocket < OCP_NLP
     % |___/\___|
     %
     function bc = bc( self, tL, tR, XL, XR, P )
-      hL = XL(1); vL = XL(2); mL = XL(3);
-      hR = XR(1); vR = XR(2); mR = XR(3);
-      bc = [ hL - self.h_i; ...
-             vL - self.v_i; ...
-             mL - self.m_i; ...
-             mR - self.m_f ];
-      if self.nbc == 5
-        bc = [ bc; vR - self.v_f];
-      end
+      ....
+      ....
     end
     %
     function Jac = bc_jacobian( self, tL, tR, XL, XR, P )
-      Jac = sparse( self.nbc, 7 );
-      Jac(1,1) = 1;
-      Jac(2,2) = 1;
-      Jac(3,3) = 1;
-      Jac(4,6) = 1;
-      if self.nbc == 5
-        Jac(5,5) = 1;
-      end
+      ...
+      ...
     end
     %
     function Jac = bc_jacobian_pattern( self )
-      Jac = sparse( self.nbc, 7 );
-      Jac(1,1) = 1;
-      Jac(2,2) = 1;
-      Jac(3,3) = 1;
-      Jac(4,6) = 1;
-      if self.nbc == 5
-        Jac(5,5) = 1;
-      end
+      ...
+      ...
     end
     %
     function Hess = bc_hessian( ~, tL, tR, XL, XR, P, L )
-      Hess = zeros(7,7);
+      ...
+      ...
     end
     %
     function Hess = bc_hessian_pattern( ~ )
-      Hess = zeros(7,7);
+      ...
     end
 
     %  _______     __                  _             _
@@ -580,22 +370,15 @@ classdef OCP_GoddardRocket < OCP_NLP
     %   |_|    \_/     \___\___/|_| |_|\__|_|  \___/|_|___/
     % tvU
     function tvU = TVU( self, dt, UCL, UCR )
-      %tvU = self.TVU_zero( dt, UCL, UCR );
-      tvU = self.TVU_reg( self.epsi1, dt, UCL, UCR );
+      tvU = self.TVU_reg( self.epsi*ones(self.nu,1), dt, UCL, UCR );
     end
-
     function tvG = TVU_gradient( self, dt, UCL, UCR )
-      %tvG = self.TVU_zero_gradient( dt, UCL, UCR );
-      tvG = self.TVU_reg_gradient( self.epsi1, dt, UCL, UCR );
+      tvG = self.TVU_reg_gradient( self.epsi*ones(self.nu,1), dt, UCL, UCR );
     end
-
     function tvH = TVU_hessian( self, dt, UCL, UCR )
-      %tvH = self.TVU_zero_hessian( dt, UCL, UCR );
-      tvH = self.TVU_reg_hessian( self.epsi1, dt, UCL, UCR );
+      tvH = self.TVU_reg_hessian( self.epsi*ones(self.nu,1), dt, UCL, UCR );
     end
-
     function tvH = TVU_hessian_pattern( self )
-      %tvH = self.TVU_zero_hessian_pattern();
       tvH = self.TVU_reg_hessian_pattern();
     end
 

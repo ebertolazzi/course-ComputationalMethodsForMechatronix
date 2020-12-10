@@ -195,11 +195,20 @@ classdef (Abstract) OCP_NLP < handle
           nu, N, size(U,1), size(U,2) ...
         );
       end
-      if min(size(P)) ~= 1 || max(size(P)) ~= np
-        error( ...
-          'in function pack, P must be %i x 1 or 1 x 1 found %i x %i', ...
-          np, np, size(P,1), size(P,2) ...
-        );
+      if np > 0
+        if min(size(P)) ~= 1 || max(size(P)) ~= np
+          error( ...
+            'in function pack, P must be %i x 1 or 1 x %i found %i x %i', ...
+            np, np, size(P,1), size(P,2) ...
+          );
+        end
+      else
+        if min(size(P)) ~= 0
+          error( ...
+            'in function pack, P must be 1 x 0 or 0 x 1 or 0 x 0  found %i x %i', ...
+            size(P,1), size(P,2) ...
+          );
+        end
       end
       XUP = [ reshape( X, nx*N, 1 ); ...
               reshape( U, nu*(N-nseg), 1 ); ...
@@ -888,21 +897,21 @@ classdef (Abstract) OCP_NLP < handle
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     function tvU = TVU_standard( self, epsi, dt, UCL, UCR )
-      tvU = sum( epsi .* (UCR-UCL).^2)/dt;
+      tvU = sum( (epsi/2/dt) .* (UCR-UCL).^2 );
     end
 
     function tvG = TVU_standard_gradient( self, epsi, dt, UCL, UCR )
-      tmp = (2/dt) * reshape( epsi .* (UCR-UCL), 1, self.nu);
+      tmp = reshape( (epsi/dt) .* (UCR-UCL), 1, self.nu );
       tvG = [ -tmp, tmp ];
     end
 
     function tvH = TVU_standard_hessian( self, epsi, dt, UCL, UCR )
-      tmp = spdiags( 2 * epsi / dt, 0, self.nu,self.nu);
+      tmp = (epsi/dt)*speye( self.nu, self.nu );
       tvH = sparse([ tmp, -tmp; -tmp, tmp ]);
     end
 
     function tvH = TVU_standard_hessian_pattern( self )
-      tmp = speye(self.nu);
+      tmp = speye( self.nu );
       tvH = [ tmp, tmp; tmp, tmp ];
     end
 
@@ -913,7 +922,7 @@ classdef (Abstract) OCP_NLP < handle
     end
     %
     function tvG = TVU_reg_gradient( self, epsi, dt, UCL, UCR )
-      tmp = reshape( epsi .* self.absreg_D(UCR-UCL), 1, self.nu);
+      tmp = reshape( epsi .* self.absreg_D(UCR-UCL), 1, self.nu );
       tvG = [ -tmp, tmp ];
     end
     %
@@ -924,7 +933,7 @@ classdef (Abstract) OCP_NLP < handle
     end
     %
     function tvH = TVU_reg_hessian_pattern( self )
-      tmp = speye(self.nu);
+      tmp = speye( self.nu );
       tvH = [ tmp, tmp; tmp, tmp ];
     end
 

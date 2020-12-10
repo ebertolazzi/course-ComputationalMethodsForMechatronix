@@ -1,6 +1,6 @@
 %--------------------------------------------------------------------------%
 %                                                                          %
-%  Copyright (C) 2018                                                      %
+%  Copyright (C) 2020                                                      %
 %                                                                          %
 %         , __                 , __                                        %
 %        /|/  \               /|/  \                                       %
@@ -20,11 +20,8 @@
 addpath('../../lib');
 
 N  = 100;
-%n1 = 0.1*(0:50)/50;
-%n2 = n1(end)+0.9*(0:N)/N;
 nodes = 0:1/N:1;
-
-bb = OCP_GoddardRocket();
+bb = OCP_RobotArm();
 bb.setup( nodes );
 
 info = bb.solve();
